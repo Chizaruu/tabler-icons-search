@@ -65,58 +65,62 @@ function getStoredValue<T>(key: string, defaultValue: T): T {
     }
 }
 
-// Helper to create persistent reactive state
-function createPersistentState<T>(key: string, defaultValue: T) {
-    let value = $state(getStoredValue(key, defaultValue));
+// Helper to create persistent reactive state using a class
+// This avoids $effect by manually writing to localStorage in the setter
+class PersistentState<T> {
+    #value = $state<T>() as T;
+    #key: string;
 
-    if (browser) {
-        $effect(() => {
-            localStorage.setItem(key, JSON.stringify(value));
-        });
+    constructor(key: string, defaultValue: T) {
+        this.#key = key;
+        this.#value = getStoredValue(key, defaultValue);
     }
 
-    return {
-        get value() {
-            return value;
-        },
-        set value(newValue: T) {
-            value = newValue;
-        },
-    };
+    get value(): T {
+        return this.#value;
+    }
+
+    set value(newValue: T) {
+        this.#value = newValue;
+        // Manually persist to localStorage on every change
+        if (browser) {
+            try {
+                localStorage.setItem(this.#key, JSON.stringify(newValue));
+            } catch (e) {
+                console.error(
+                    `Failed to save ${this.#key} to localStorage:`,
+                    e
+                );
+            }
+        }
+    }
 }
 
 // Create persistent state objects
-const frameworkState = createPersistentState<FrameworkId>(
+export const selectedFramework = new PersistentState<FrameworkId>(
     "tabler-icons-framework",
     DEFAULT_FRAMEWORK
 );
 
-const packageManagerState = createPersistentState<PackageManager>(
+export const selectedPackageManager = new PersistentState<PackageManager>(
     "tabler-icons-package-manager",
     DEFAULT_PACKAGE_MANAGER
 );
 
-const gridSizeState = createPersistentState<GridSize>(
+export const selectedGridSize = new PersistentState<GridSize>(
     "tabler-icons-grid-size",
     DEFAULT_GRID_SIZE
 );
 
-const themeState = createPersistentState<Theme>(
+export const selectedTheme = new PersistentState<Theme>(
     "tabler-icons-theme",
     DEFAULT_THEME
 );
 
-const iconColorState = createPersistentState<string>(
+export const iconColor = new PersistentState<string>(
     "tabler-icons-color",
     DEFAULT_ICON_COLOR
 );
-
-// Export the reactive state objects
-export const selectedFramework = frameworkState;
-export const selectedPackageManager = packageManagerState;
-export const selectedGridSize = gridSizeState;
-export const selectedTheme = themeState;
-export const iconColor = iconColorState;
 
 // Helper function to get install command
 export function getInstallCommand(

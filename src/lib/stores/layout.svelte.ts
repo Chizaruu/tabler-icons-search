@@ -2,35 +2,14 @@
 import { browser } from "$app/environment";
 
 /**
- * Create a reactive window dimension state
- * @returns An object containing:
- *   - width {number} - Current window width
- *   - height {number} - Current window height
- *   - isMobile {boolean} - True if width is below tablet breakpoint
- *   - isTablet {boolean} - True if width is between tablet and desktop breakpoints
- *   - isDesktop {boolean} - True if width is above desktop breakpoint
- *   - breakpoints {Object} - Object containing breakpoint values
+ * Reactive window dimension state using a class
+ * Note: Resize listener must be set up in a component using setupResizeListener()
  */
-function createWindowState() {
-    let width = $state(browser ? window.innerWidth : 1024);
-    let height = $state(browser ? window.innerHeight : 768);
+class WindowState {
+    #width = $state(browser ? window.innerWidth : 1024);
+    #height = $state(browser ? window.innerHeight : 768);
 
-    if (browser) {
-        $effect(() => {
-            const handleResize = () => {
-                width = window.innerWidth;
-                height = window.innerHeight;
-            };
-
-            window.addEventListener("resize", handleResize);
-
-            return () => {
-                window.removeEventListener("resize", handleResize);
-            };
-        });
-    }
-
-    const breakpoints = {
+    readonly breakpoints = {
         sm: 640,
         md: 768,
         lg: 1024,
@@ -38,37 +17,62 @@ function createWindowState() {
         "2xl": 1536,
     } as const;
 
-    return {
-        get width() {
-            return width;
-        },
-        get height() {
-            return height;
-        },
-        get isMobile() {
-            return width < breakpoints.md;
-        },
-        get isTablet() {
-            return width >= breakpoints.md && width < breakpoints.lg;
-        },
-        get isDesktop() {
-            return width >= breakpoints.lg;
-        },
-        get breakpoint() {
-            // Returns the current breakpoint name
-            if (width < breakpoints.sm) return "xs";
-            if (width < breakpoints.md) return "sm";
-            if (width < breakpoints.lg) return "md";
-            if (width < breakpoints.xl) return "lg";
-            if (width < breakpoints["2xl"]) return "xl";
-            return "2xl";
-        },
-        get orientation() {
-            // Returns 'landscape' or 'portrait'
-            return width > height ? "landscape" : "portrait";
-        },
-        breakpoints,
-    };
+    /**
+     * Call this in a component to set up automatic resize tracking
+     * Example: $effect(() => windowState.setupResizeListener());
+     */
+    setupResizeListener() {
+        if (!browser) return;
+
+        const handleResize = () => {
+            this.#width = window.innerWidth;
+            this.#height = window.innerHeight;
+        };
+
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }
+
+    get width() {
+        return this.#width;
+    }
+
+    get height() {
+        return this.#height;
+    }
+
+    get isMobile() {
+        return this.#width < this.breakpoints.md;
+    }
+
+    get isTablet() {
+        return (
+            this.#width >= this.breakpoints.md &&
+            this.#width < this.breakpoints.lg
+        );
+    }
+
+    get isDesktop() {
+        return this.#width >= this.breakpoints.lg;
+    }
+
+    get breakpoint() {
+        // Returns the current breakpoint name
+        if (this.#width < this.breakpoints.sm) return "xs";
+        if (this.#width < this.breakpoints.md) return "sm";
+        if (this.#width < this.breakpoints.lg) return "md";
+        if (this.#width < this.breakpoints.xl) return "lg";
+        if (this.#width < this.breakpoints["2xl"]) return "xl";
+        return "2xl";
+    }
+
+    get orientation() {
+        // Returns 'landscape' or 'portrait'
+        return this.#width > this.#height ? "landscape" : "portrait";
+    }
 }
 
-export const windowState = createWindowState();
+export const windowState = new WindowState();
