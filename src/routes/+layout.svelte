@@ -93,6 +93,7 @@
         scroll-behavior: smooth;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        color-scheme: light dark;
     }
 
     /* CSS Variables for theming */
