@@ -1,122 +1,122 @@
 {
-  "cdnVersion": "3.35.0",
-  "frameworks": [
-    {
-      "id": "svelte-runes",
-      "name": "Svelte 5 (Runes)",
-      "package": "@tabler/icons-svelte",
-      "cdnPackage": "@tabler/icons-svelte",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "component-library"
-    },
-    {
-      "id": "svelte",
-      "name": "Svelte 4",
-      "package": "@tabler/icons-svelte",
-      "cdnPackage": "@tabler/icons-svelte",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "component-library"
-    },
-    {
-      "id": "react",
-      "name": "React",
-      "package": "@tabler/icons-react",
-      "cdnPackage": "@tabler/icons-react",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "component-library"
-    },
-    {
-      "id": "react-native",
-      "name": "React Native",
-      "package": "@tabler/icons-react-native",
-      "cdnPackage": "@tabler/icons-react-native",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "component-library"
-    },
-    {
-      "id": "vue",
-      "name": "Vue",
-      "package": "@tabler/icons-vue",
-      "cdnPackage": "@tabler/icons-vue",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "component-library"
-    },
-    {
-      "id": "solidjs",
-      "name": "SolidJS",
-      "package": "@tabler/icons-solidjs",
-      "cdnPackage": "@tabler/icons-solidjs",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "component-library"
-    },
-    {
-      "id": "preact",
-      "name": "Preact",
-      "package": "@tabler/icons-preact",
-      "cdnPackage": "@tabler/icons-preact",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "component-library"
-    },
-    {
-      "id": "angular",
-      "name": "Angular",
-      "package": "@tabler/icons-angular",
-      "cdnPackage": "@tabler/icons",
-      "hasCdnPackage": false,
-      "hasNpmPackage": false,
-      "category": "component-library"
-    },
-    {
-      "id": "web-components",
-      "name": "Web Components",
-      "package": "@tabler/icons-webcomponents",
-      "cdnPackage": "@tabler/icons",
-      "hasCdnPackage": false,
-      "hasNpmPackage": false,
-      "category": "component-library"
-    },
-    {
-      "id": "svg",
-      "name": "SVG / HTML",
-      "package": "@tabler/icons",
-      "cdnPackage": "@tabler/icons",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "static"
-    },
-    {
-      "id": "png",
-      "name": "PNG Images",
-      "package": "@tabler/icons-png",
-      "cdnPackage": "@tabler/icons-png",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "static"
-    },
-    {
-      "id": "sprite",
-      "name": "SVG Sprite",
-      "package": "@tabler/icons-sprite",
-      "cdnPackage": "@tabler/icons-sprite",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "static"
-    },
-    {
-      "id": "webfont",
-      "name": "Web Font",
-      "package": "@tabler/icons-webfont",
-      "cdnPackage": "@tabler/icons-webfont",
-      "hasCdnPackage": true,
-      "hasNpmPackage": true,
-      "category": "static"
-    }
-  ]
+    "cdnVersion": "3.35.0",
+    "frameworks": [
+        {
+            "id": "svelte-runes",
+            "name": "Svelte 5 (Runes)",
+            "package": "@tabler/icons-svelte",
+            "cdnPackage": "@tabler/icons-svelte",
+            "hasCdnPackage": true,
+            "hasNpmPackage": true,
+            "category": "component-library"
+        },
+        {
+            "id": "svelte",
+            "name": "Svelte 4",
+            "package": "@tabler/icons-svelte",
+            "cdnPackage": "@tabler/icons-svelte",
+            "hasCdnPackage": true,
+            "hasNpmPackage": true,
+            "category": "component-library"
+        },
+        {
+            "id": "react",
+            "name": "React",
+            "package": "@tabler/icons-react",
+            "cdnPackage": "@tabler/icons-react",
+            "hasCdnPackage": true,
+            "hasNpmPackage": true,
+            "category": "component-library"
+        },
+        {
+            "id": "react-native",
+            "name": "React Native",
+            "package": "@tabler/icons-react-native",
+            "cdnPackage": "@tabler/icons-react-native",
+            "hasCdnPackage": true,
+            "hasNpmPackage": true,
+            "category": "component-library"
+        },
+        {
+            "id": "vue",
+            "name": "Vue",
+            "package": "@tabler/icons-vue",
+            "cdnPackage": "@tabler/icons-vue",
+            "hasCdnPackage": true,
+            "hasNpmPackage": true,
+            "category": "component-library"
+        },
+        {
+            "id": "solidjs",
+            "name": "SolidJS",
+            "package": "@tabler/icons-solidjs",
+            "cdnPackage": "@tabler/icons-solidjs",
+            "hasCdnPackage": true,
+            "hasNpmPackage": true,
+            "category": "component-library"
+        },
+        {
+            "id": "preact",
+            "name": "Preact",
+            "package": "@tabler/icons-preact",
+            "cdnPackage": "@tabler/icons-preact",
+            "hasCdnPackage": true,
+            "hasNpmPackage": true,
+            "category": "component-library"
+        },
+        {
+            "id": "angular",
+            "name": "Angular",
+            "package": "@tabler/icons-angular",
+            "cdnPackage": "@tabler/icons",
+            "hasCdnPackage": false,
+            "hasNpmPackage": false,
+            "category": "component-library"
+        },
+        {
+            "id": "web-components",
+            "name": "Web Components",
+            "package": "@tabler/icons-webcomponents",
+            "cdnPackage": "@tabler/icons",
+            "hasCdnPackage": false,
+            "hasNpmPackage": false,
+            "category": "component-library"
+        },
+        {
+            "id": "svg",
+            "name": "SVG / HTML",
+            "package": "@tabler/icons",
+            "cdnPackage": "@tabler/icons",
+            "hasCdnPackage": false,
+            "hasNpmPackage": true,
+            "category": "static"
+        },
+        {
+            "id": "png",
+            "name": "PNG Images",
+            "package": "@tabler/icons-png",
+            "cdnPackage": "@tabler/icons-png",
+            "hasCdnPackage": false,
+            "hasNpmPackage": true,
+            "category": "static"
+        },
+        {
+            "id": "sprite",
+            "name": "SVG Sprite",
+            "package": "@tabler/icons-sprite",
+            "cdnPackage": "@tabler/icons-sprite",
+            "hasCdnPackage": false,
+            "hasNpmPackage": true,
+            "category": "static"
+        },
+        {
+            "id": "webfont",
+            "name": "Web Font",
+            "package": "@tabler/icons-webfont",
+            "cdnPackage": "@tabler/icons-webfont",
+            "hasCdnPackage": false,
+            "hasNpmPackage": true,
+            "category": "static"
+        }
+    ]
 }
