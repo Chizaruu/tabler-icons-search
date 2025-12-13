@@ -87,8 +87,8 @@
             "name": "SVG / HTML",
             "package": "@tabler/icons",
             "cdnPackage": "@tabler/icons",
-            "hasCdnPackage": false,
-            "hasNpmPackage": true,
+            "hasCdnPackage": true,
+            "hasNpmPackage": false,
             "category": "static"
         },
         {
@@ -96,8 +96,8 @@
             "name": "PNG Images",
             "package": "@tabler/icons-png",
             "cdnPackage": "@tabler/icons-png",
-            "hasCdnPackage": false,
-            "hasNpmPackage": true,
+            "hasCdnPackage": true,
+            "hasNpmPackage": false,
             "category": "static"
         },
         {
@@ -105,8 +105,8 @@
             "name": "SVG Sprite",
             "package": "@tabler/icons-sprite",
             "cdnPackage": "@tabler/icons-sprite",
-            "hasCdnPackage": false,
-            "hasNpmPackage": true,
+            "hasCdnPackage": true,
+            "hasNpmPackage": false,
             "category": "static"
         },
         {
@@ -114,8 +114,8 @@
             "name": "Web Font",
             "package": "@tabler/icons-webfont",
             "cdnPackage": "@tabler/icons-webfont",
-            "hasCdnPackage": false,
-            "hasNpmPackage": true,
+            "hasCdnPackage": true,
+            "hasNpmPackage": false,
             "category": "static"
         }
     ]
