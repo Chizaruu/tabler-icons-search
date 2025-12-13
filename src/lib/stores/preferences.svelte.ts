@@ -1,5 +1,9 @@
-import { writable } from "svelte/store";
+// $lib/stores/preferences.svelte.ts
 import { browser } from "$app/environment";
+import { FRAMEWORKS, type FrameworkId } from "$lib/data/frameworks";
+
+// Re-export framework data for convenience
+export { FRAMEWORKS, type FrameworkId } from "$lib/data/frameworks";
 
 // Package managers with their install commands
 export type PackageManager = "pnpm" | "npm" | "yarn" | "bun";
@@ -44,7 +48,7 @@ export const GRID_SIZES: {
 export type Theme = "light" | "dark";
 
 // Default values
-const DEFAULT_FRAMEWORK = "svelte-runes";
+const DEFAULT_FRAMEWORK: FrameworkId = "svelte-runes";
 const DEFAULT_PACKAGE_MANAGER: PackageManager = "pnpm";
 const DEFAULT_GRID_SIZE: GridSize = "medium";
 const DEFAULT_THEME: Theme = "light";
@@ -61,41 +65,58 @@ function getStoredValue<T>(key: string, defaultValue: T): T {
     }
 }
 
-// Helper to set to localStorage
-function createPersistentStore<T>(key: string, defaultValue: T) {
-    const initial = getStoredValue(key, defaultValue);
-    const store = writable<T>(initial);
+// Helper to create persistent reactive state
+function createPersistentState<T>(key: string, defaultValue: T) {
+    let value = $state(getStoredValue(key, defaultValue));
 
     if (browser) {
-        store.subscribe((value) => {
+        $effect(() => {
             localStorage.setItem(key, JSON.stringify(value));
         });
     }
 
-    return store;
+    return {
+        get value() {
+            return value;
+        },
+        set value(newValue: T) {
+            value = newValue;
+        },
+    };
 }
 
-// Create persistent stores
-export const selectedFramework = createPersistentStore(
+// Create persistent state objects
+const frameworkState = createPersistentState<FrameworkId>(
     "tabler-icons-framework",
     DEFAULT_FRAMEWORK
 );
-export const selectedPackageManager = createPersistentStore<PackageManager>(
+
+const packageManagerState = createPersistentState<PackageManager>(
     "tabler-icons-package-manager",
     DEFAULT_PACKAGE_MANAGER
 );
-export const selectedGridSize = createPersistentStore<GridSize>(
+
+const gridSizeState = createPersistentState<GridSize>(
     "tabler-icons-grid-size",
     DEFAULT_GRID_SIZE
 );
-export const selectedTheme = createPersistentStore<Theme>(
+
+const themeState = createPersistentState<Theme>(
     "tabler-icons-theme",
     DEFAULT_THEME
 );
-export const iconColor = createPersistentStore<string>(
+
+const iconColorState = createPersistentState<string>(
     "tabler-icons-color",
     DEFAULT_ICON_COLOR
 );
+
+// Export the reactive state objects
+export const selectedFramework = frameworkState;
+export const selectedPackageManager = packageManagerState;
+export const selectedGridSize = gridSizeState;
+export const selectedTheme = themeState;
+export const iconColor = iconColorState;
 
 // Helper function to get install command
 export function getInstallCommand(

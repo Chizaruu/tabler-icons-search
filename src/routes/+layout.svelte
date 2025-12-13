@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { selectedTheme } from "$lib/stores/preferences";
+    import { selectedTheme } from "$lib/stores/preferences.svelte";
     import { browser } from "$app/environment";
 
     const { children } = $props();
@@ -7,12 +7,16 @@
     // Apply theme to document
     $effect(() => {
         if (browser) {
-            document.documentElement.setAttribute("data-theme", $selectedTheme);
+            document.documentElement.setAttribute(
+                "data-theme",
+                selectedTheme.value
+            );
         }
     });
 
     function toggleTheme() {
-        $selectedTheme = $selectedTheme === "light" ? "dark" : "light";
+        selectedTheme.value =
+            selectedTheme.value === "light" ? "dark" : "light";
     }
 </script>
 
@@ -37,11 +41,11 @@
     class="theme-toggle"
     onclick={toggleTheme}
     aria-label="Toggle theme"
-    title={$selectedTheme === "light"
+    title={selectedTheme.value === "light"
         ? "Switch to dark mode"
         : "Switch to light mode"}
 >
-    {#if $selectedTheme === "light"}
+    {#if selectedTheme.value === "light"}
         <!-- Moon Icon -->
         <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -1,6 +1,9 @@
 {
- "cSpell.words": [
-  "solidjs",
-  "webcomponents"
- ]
+    "cSpell.words": [
+        "importmap",
+        "nostroke",
+        "solidjs",
+        "webcomponents",
+        "xlink"
+    ]
 }

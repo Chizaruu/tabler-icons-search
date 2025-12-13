@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { iconColor, selectedTheme } from "$lib/stores/preferences";
+    import { iconColor, selectedTheme } from "$lib/stores/preferences.svelte";
 
     let { onclose } = $props();
 
     // State for the color picker
-    let tempColor = $state($iconColor);
-    let hexInput = $state($iconColor);
+    let tempColor = $state(iconColor.value);
+    let hexInput = $state(iconColor.value);
     let hue = $state(0);
     let saturation = $state(100);
     let lightness = $state(50);
@@ -151,7 +151,7 @@
     }
 
     function applyColor() {
-        $iconColor = tempColor;
+        iconColor.value = tempColor;
         onclose();
     }
 
@@ -178,7 +178,7 @@
     aria-modal="true"
     aria-labelledby="modal-title"
     tabindex="-1"
-    data-theme={$selectedTheme}
+    data-theme={selectedTheme.value}
 >
     <div class="modal-content">
         <div class="modal-header">

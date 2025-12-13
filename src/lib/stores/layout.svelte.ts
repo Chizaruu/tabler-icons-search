@@ -16,15 +16,18 @@ function createWindowState() {
     let height = $state(browser ? window.innerHeight : 768);
 
     if (browser) {
-        const handleResize = () => {
-            width = window.innerWidth;
-            height = window.innerHeight;
-        };
+        $effect(() => {
+            const handleResize = () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+            };
 
-        window.addEventListener("resize", handleResize);
+            window.addEventListener("resize", handleResize);
 
-        // Cleanup is handled automatically by Svelte when the module is destroyed
-        // But if you need manual cleanup, you can track listeners separately
+            return () => {
+                window.removeEventListener("resize", handleResize);
+            };
+        });
     }
 
     const breakpoints = {

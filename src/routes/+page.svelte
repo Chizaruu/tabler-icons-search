@@ -10,7 +10,13 @@
         getGridColumns,
         selectedTheme,
         iconColor,
-    } from "$lib/stores/preferences";
+        selectedPackageManager,
+        PACKAGE_MANAGERS,
+        selectedFramework,
+        type PackageManager,
+        FRAMEWORKS,
+        type FrameworkId,
+    } from "$lib/stores/preferences.svelte";
     import { windowState } from "$lib/stores/layout.svelte";
 
     type IconData = {
@@ -48,10 +54,35 @@
     let selectedStyle = $state("all");
     let selectedIcon = $state<IconData | null>(null);
     let showColorPicker = $state(false);
+    let selectedInstallMethod = $state<"package" | "cdn">("cdn");
+
+    // Collapsible sections state - multiple sections can be open
+    let expandedSections = $state<Set<string>>(
+        new Set(windowState.isMobile ? [] : ["display"])
+    );
+
+    // Get current framework capabilities
+    let currentFramework = $derived(
+        FRAMEWORKS.find((f) => f.id === selectedFramework.value)
+    );
+    let hasCdn = $derived(currentFramework?.hasCdnPackage ?? true);
+    let hasPackage = $derived(currentFramework?.hasNpmPackage ?? true);
+
+    // Auto-switch to available install method when framework changes
+    $effect(() => {
+        if (!hasCdn && hasPackage) {
+            // Framework only has package support
+            selectedInstallMethod = "package";
+        } else if (hasCdn && !hasPackage) {
+            // Framework only has CDN support
+            selectedInstallMethod = "cdn";
+        }
+        // If both are available or neither, keep current selection
+    });
 
     // Calculate grid columns based on selected size and screen width from windowState
     let gridColumns = $derived(
-        getGridColumns($selectedGridSize, windowState.width)
+        getGridColumns(selectedGridSize.value, windowState.width)
     );
 
     // Filtered icons based on search and style
@@ -91,28 +122,47 @@
     }
 
     function toggleTheme() {
-        selectedTheme.update((current) =>
-            current === "light" ? "dark" : "light"
-        );
+        selectedTheme.value =
+            selectedTheme.value === "light" ? "dark" : "light";
+    }
+
+    function toggleSection(section: string) {
+        const newSections = new Set(expandedSections);
+        if (newSections.has(section)) {
+            newSections.delete(section);
+        } else {
+            newSections.add(section);
+        }
+        expandedSections = newSections;
+    }
+
+    function isSectionExpanded(section: string): boolean {
+        return expandedSections.has(section);
     }
 
     // Automatically force large grid size on mobile using $effect
     $effect(() => {
-        if (windowState.isMobile && $selectedGridSize !== "large") {
-            selectedGridSize.set("large");
+        if (windowState.isMobile && selectedGridSize.value !== "large") {
+            selectedGridSize.value = "large";
         }
     });
 </script>
 
 <svelte:head>
-    <title>Tabler Icons Search - {stats.total} Icons for All Frameworks</title>
+    <title
+        >Tabler Icons Search - {stats.total} Icons with CDN & NPM Support</title
+    >
     <meta
         name="description"
-        content="Search 5000+ Tabler Icons with code examples for React, Vue, Svelte, Angular, SolidJS, React Native, Preact, Web Components, PNG, SVG Sprite, Web Font, and HTML/SVG"
+        content="Search 5000+ Tabler Icons with instant CDN links (jsDelivr) and NPM package code examples for React, Vue, Svelte, Angular, SolidJS, React Native, Preact, Web Components, PNG, SVG Sprite, Web Font, and HTML/SVG. Zero bundle size with CDN delivery."
+    />
+    <meta
+        name="keywords"
+        content="tabler icons, icon search, cdn icons, jsdelivr, svg icons, react icons, vue icons, svelte icons, icon library, free icons"
     />
 </svelte:head>
 
-<div class="page-wrapper" data-theme={$selectedTheme}>
+<div class="page-wrapper" data-theme={selectedTheme.value}>
     <div class="container">
         <header>
             <div class="header-content">
@@ -123,10 +173,17 @@
                         Icons
                     </p>
                     <p class="frameworks">
-                        Works with: React • Vue • Svelte • Angular • SolidJS •
-                        React Native • Preact • Web Components • PNG • SVG
-                        Sprite • Web Font
+                        <strong>📦 CDN & NPM:</strong> React • Vue • Svelte •
+                        SolidJS • Preact • React Native
+                        <br />
+                        <strong>🌐 CDN Only:</strong> Angular • Web Components •
+                        SVG • PNG • Sprite • Web Font
                     </p>
+                    <div class="features">
+                        <span class="feature-badge">✨ Zero Bundle Size</span>
+                        <span class="feature-badge">⚡ CDN Delivery</span>
+                        <span class="feature-badge">📋 Copy Code</span>
+                    </div>
                     <div class="links">
                         <a
                             href="https://github.com/tabler/tabler-icons"
@@ -142,6 +199,13 @@
                         >
                             🌐 Official Site
                         </a>
+                        <a
+                            href="https://www.jsdelivr.com/package/npm/@tabler/icons"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            🚀 CDN (jsDelivr)
+                        </a>
                     </div>
                 </div>
                 <button
@@ -149,7 +213,7 @@
                     onclick={toggleTheme}
                     aria-label="Toggle theme"
                 >
-                    {#if $selectedTheme === "light"}
+                    {#if selectedTheme.value === "light"}
                         <svg
                             width="24"
                             height="24"
@@ -195,6 +259,7 @@
         </header>
 
         <div class="controls">
+            <!-- Search Bar - Always Visible -->
             <div class="search-box">
                 <svg
                     class="search-icon"
@@ -213,88 +278,281 @@
                     bind:value={searchQuery}
                     placeholder="Search icons... (e.g. 'home', 'user', 'arrow')"
                 />
+                {#if searchQuery}
+                    <button
+                        class="search-clear"
+                        onclick={() => (searchQuery = "")}
+                        aria-label="Clear search"
+                    >
+                        ×
+                    </button>
+                {/if}
             </div>
 
-            <div class="controls-row">
-                <div class="filter-group">
-                    <label for="style-filter" class="filter-label">Style:</label
-                    >
-                    <div class="filter-buttons">
-                        <button
-                            class="filter-btn"
-                            class:active={selectedStyle === "all"}
-                            onclick={() => (selectedStyle = "all")}
-                        >
-                            All
-                        </button>
-                        <button
-                            class="filter-btn"
-                            class:active={selectedStyle === "filled"}
-                            onclick={() => (selectedStyle = "filled")}
-                        >
-                            Filled ({stats.filled})
-                        </button>
-                        <button
-                            class="filter-btn"
-                            class:active={selectedStyle === "outline"}
-                            onclick={() => (selectedStyle = "outline")}
-                        >
-                            Outline ({stats.outline})
-                        </button>
-                    </div>
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stats">
+                    <span>Total: {stats.total}</span>
+                    <span>Showing: {stats.filtered}</span>
                 </div>
+                {#if !windowState.isMobile}
+                    <span class="cdn-hint"
+                        >💡 Hover icons for quick CDN copy</span
+                    >
+                {/if}
+            </div>
 
-                {#if windowState.isDesktop || windowState.isTablet}
-                    <div class="filter-group">
-                        <label for="size-filter" class="filter-label"
-                            >Size:</label
+            <!-- Section 1: Style & Display -->
+            <div class="control-section">
+                <button
+                    class="section-header"
+                    class:expanded={isSectionExpanded("display")}
+                    onclick={() => toggleSection("display")}
+                >
+                    <span class="section-title">
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
                         >
-                        <div class="filter-buttons">
-                            {#each GRID_SIZES as size}
-                                <button
-                                    class="filter-btn"
-                                    class:active={$selectedGridSize === size.id}
-                                    onclick={() =>
-                                        ($selectedGridSize = size.id)}
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Style & Display
+                    </span>
+                    {#if windowState.isMobile}
+                        <svg
+                            class="chevron"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    {/if}
+                </button>
+
+                {#if isSectionExpanded("display")}
+                    <div class="section-content">
+                        <div class="control-grid">
+                            <!-- Style Filter -->
+                            <div class="control-item">
+                                <label for="iconStyle" class="control-label"
+                                    >Icon Style</label
                                 >
-                                    {size.name}
-                                </button>
-                            {/each}
+                                <div class="button-group">
+                                    <button
+                                        class="control-btn"
+                                        class:active={selectedStyle === "all"}
+                                        onclick={() => (selectedStyle = "all")}
+                                    >
+                                        All ({stats.total})
+                                    </button>
+                                    <button
+                                        class="control-btn"
+                                        class:active={selectedStyle ===
+                                            "filled"}
+                                        onclick={() =>
+                                            (selectedStyle = "filled")}
+                                    >
+                                        Filled ({stats.filled})
+                                    </button>
+                                    <button
+                                        class="control-btn"
+                                        class:active={selectedStyle ===
+                                            "outline"}
+                                        onclick={() =>
+                                            (selectedStyle = "outline")}
+                                    >
+                                        Outline ({stats.outline})
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Grid Size (Desktop/Tablet only) -->
+                            {#if windowState.isDesktop || windowState.isTablet}
+                                <div class="control-item">
+                                    <label for="gridSize" class="control-label"
+                                        >Grid Size</label
+                                    >
+                                    <div class="button-group">
+                                        {#each GRID_SIZES as size}
+                                            <button
+                                                class="control-btn"
+                                                class:active={selectedGridSize.value ===
+                                                    size.id}
+                                                onclick={() =>
+                                                    (selectedGridSize.value =
+                                                        size.id)}
+                                            >
+                                                {size.name}
+                                            </button>
+                                        {/each}
+                                    </div>
+                                </div>
+                            {/if}
+
+                            <!-- Color Picker -->
+                            <div class="control-item">
+                                <label for="iconColor" class="control-label"
+                                    >Icon Color</label
+                                >
+                                <div class="color-controls">
+                                    <button
+                                        class="color-swatch"
+                                        onclick={() => (showColorPicker = true)}
+                                        style="background-color: {iconColor.value};"
+                                        aria-label="Choose color"
+                                        title="Click to choose color"
+                                    ></button>
+                                    <button
+                                        class="control-btn flex-1"
+                                        onclick={() => (showColorPicker = true)}
+                                    >
+                                        🎨 Choose Color
+                                    </button>
+                                    <button
+                                        class="control-btn"
+                                        onclick={() =>
+                                            (iconColor.value = "#3b82f6")}
+                                    >
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 {/if}
-
-                <div class="filter-group">
-                    <label for="color-picker" class="filter-label"
-                        >Icon Color:</label
-                    >
-                    <div class="color-controls">
-                        <button
-                            class="color-swatch"
-                            onclick={() => (showColorPicker = true)}
-                            style="background-color: {$iconColor};"
-                            aria-label="Choose color"
-                            title="Click to choose color"
-                        ></button>
-                        <button
-                            class="filter-btn"
-                            onclick={() => (showColorPicker = true)}
-                        >
-                            🎨 Choose Color
-                        </button>
-                        <button
-                            class="filter-btn color-reset"
-                            onclick={() => iconColor.set("#3b82f6")}
-                        >
-                            Reset
-                        </button>
-                    </div>
-                </div>
             </div>
 
-            <div class="stats">
-                <span>Total: {stats.total}</span>
-                <span>Showing: {stats.filtered}</span>
+            <!-- Section 2: Code Settings -->
+            <div class="control-section">
+                <button
+                    class="section-header"
+                    class:expanded={isSectionExpanded("code")}
+                    onclick={() => toggleSection("code")}
+                >
+                    <span class="section-title">
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                        Code Settings
+                    </span>
+                    {#if windowState.isMobile}
+                        <svg
+                            class="chevron"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    {/if}
+                </button>
+
+                {#if isSectionExpanded("code")}
+                    <div class="section-content">
+                        <div class="control-grid">
+                            <!-- Framework -->
+                            <div class="control-item">
+                                <label for="framework" class="control-label"
+                                    >Framework</label
+                                >
+                                <select
+                                    id="framework"
+                                    bind:value={selectedFramework.value}
+                                    class="control-select"
+                                >
+                                    {#each FRAMEWORKS as framework}
+                                        <option value={framework.id}
+                                            >{framework.name}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
+
+                            <!-- Install Method -->
+                            <div class="control-item">
+                                <label for="installMethod" class="control-label"
+                                    >Install Method</label
+                                >
+                                <div class="button-group">
+                                    <button
+                                        class="control-btn"
+                                        class:active={selectedInstallMethod ===
+                                            "cdn"}
+                                        class:disabled={!hasCdn}
+                                        disabled={!hasCdn}
+                                        onclick={() =>
+                                            hasCdn &&
+                                            (selectedInstallMethod = "cdn")}
+                                        title={!hasCdn
+                                            ? "CDN not available for this framework"
+                                            : ""}
+                                    >
+                                        🌐 CDN
+                                    </button>
+                                    <button
+                                        class="control-btn"
+                                        class:active={selectedInstallMethod ===
+                                            "package"}
+                                        class:disabled={!hasPackage}
+                                        disabled={!hasPackage}
+                                        onclick={() =>
+                                            hasPackage &&
+                                            (selectedInstallMethod = "package")}
+                                        title={!hasPackage
+                                            ? "Package not available for this framework"
+                                            : ""}
+                                    >
+                                        📦 Package
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Package Manager -->
+                            <div class="control-item">
+                                <label
+                                    for="packageManager"
+                                    class="control-label">Package Manager</label
+                                >
+                                <div class="button-group">
+                                    {#each PACKAGE_MANAGERS as pm}
+                                        <button
+                                            class="control-btn"
+                                            class:active={selectedPackageManager.value ===
+                                                pm.id}
+                                            onclick={() =>
+                                                (selectedPackageManager.value =
+                                                    pm.id)}
+                                        >
+                                            {pm.name}
+                                        </button>
+                                    {/each}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {/if}
             </div>
         </div>
 
@@ -327,7 +585,7 @@
                     })}
                         <IconCard
                             {icon}
-                            iconColor={$iconColor}
+                            iconColor={iconColor.value}
                             onclick={() => handleIconClick(icon)}
                         />
                     {/snippet}
@@ -339,7 +597,10 @@
     {#if selectedIcon}
         <IconModal
             icon={selectedIcon}
-            iconColor={$iconColor}
+            iconColor={iconColor.value}
+            framework={selectedFramework.value}
+            packageManager={selectedPackageManager.value}
+            installMethod={selectedInstallMethod}
             onclose={closeModal}
         />
     {/if}
@@ -487,15 +748,38 @@
     }
 
     .frameworks {
-        color: rgba(255, 255, 255, 0.8);
+        color: rgba(255, 255, 255, 0.85);
         font-size: 0.9rem;
-        font-weight: 500;
+        line-height: 1.6;
+        margin-bottom: 0.75rem;
+    }
+
+    .frameworks strong {
+        color: rgba(255, 255, 255, 1);
+        font-weight: 600;
+    }
+
+    .features {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+    }
+
+    .feature-badge {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
     }
 
     .links {
         margin-top: 1rem;
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem;
         flex-wrap: wrap;
     }
 
@@ -507,6 +791,7 @@
         border-radius: 8px;
         transition: all 0.3s ease;
         border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 0.875rem;
     }
 
     .links a:hover {
@@ -514,76 +799,21 @@
         transform: translateY(-2px);
     }
 
+    /* Controls Section */
     .controls {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-primary);
         background: var(--bg-controls);
+        border-bottom: 1px solid var(--border-primary);
         transition: all 0.3s ease;
-    }
-
-    .controls-row {
-        display: flex;
-        gap: 2rem;
-        flex-wrap: wrap;
-        align-items: flex-start;
-    }
-
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        min-width: 200px;
-    }
-
-    .filter-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        transition: color 0.3s ease;
-    }
-
-    .color-controls {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .color-swatch {
-        width: 60px;
-        height: 38px;
-        border: 2px solid var(--border-primary);
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-        position: relative;
-    }
-
-    .color-swatch:hover {
-        border-color: var(--accent-primary);
-        transform: scale(1.05);
-        box-shadow:
-            inset 0 2px 4px rgba(0, 0, 0, 0.1),
-            0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .color-swatch:active {
-        transform: scale(0.98);
-    }
-
-    .color-reset {
-        padding: 0.5rem 0.75rem;
     }
 
     .search-box {
         position: relative;
-        margin-bottom: 1rem;
+        padding: 1.5rem 1.5rem 0 1.5rem;
     }
 
     input[type="search"] {
         width: 100%;
-        padding: 0.875rem 0.875rem 0.875rem 3rem;
+        padding: 0.875rem 3rem 0.875rem 3rem;
         border: 2px solid var(--border-primary);
         border-radius: 8px;
         font-size: 1rem;
@@ -604,20 +834,189 @@
 
     .search-icon {
         position: absolute;
-        left: 1rem;
+        left: 2.5rem;
         top: 50%;
         transform: translateY(-50%);
         color: var(--text-tertiary);
         transition: color 0.3s ease;
+        pointer-events: none;
     }
 
-    .filter-buttons {
+    .search-clear {
+        position: absolute;
+        right: 2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--bg-tertiary);
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+    }
+
+    .search-clear:hover {
+        background: var(--border-primary);
+        color: var(--text-primary);
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-primary);
+    }
+
+    .stats {
+        display: flex;
+        gap: 1.5rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .cdn-hint {
+        color: var(--text-tertiary);
+        font-size: 0.875rem;
+        font-style: italic;
+    }
+
+    /* Control Sections */
+    .control-section {
+        border-bottom: 1px solid var(--border-primary);
+    }
+
+    .control-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-header {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: var(--bg-controls);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: var(--text-primary);
+    }
+
+    .section-header:hover {
+        background: var(--bg-tertiary);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+    }
+
+    .section-title svg {
+        color: var(--accent-primary);
+    }
+
+    .chevron {
+        transition: transform 0.3s ease;
+        color: var(--text-tertiary);
+    }
+
+    .section-header.expanded .chevron {
+        transform: rotate(180deg);
+    }
+
+    .section-content {
+        padding: 1.5rem;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Control Grid */
+    .control-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .control-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .control-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .button-group {
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
     }
 
-    .filter-btn {
+    .control-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border-primary);
+        background: var(--btn-bg);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        white-space: nowrap;
+    }
+
+    .control-btn.flex-1 {
+        flex: 1;
+    }
+
+    .control-btn.active {
+        background: var(--btn-active-bg);
+        color: var(--btn-active-text);
+        border-color: var(--btn-active-bg);
+    }
+
+    .control-btn:hover:not(.active) {
+        border-color: var(--accent-primary);
+        background: var(--btn-bg-hover);
+    }
+
+    .control-btn:disabled,
+    .control-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .control-select {
+        width: 100%;
         padding: 0.5rem 1rem;
         border: 2px solid var(--border-primary);
         background: var(--btn-bg);
@@ -629,28 +1028,49 @@
         color: var(--text-primary);
     }
 
-    .filter-btn.active {
-        background: var(--btn-active-bg);
-        color: var(--btn-active-text);
-        border-color: var(--btn-active-bg);
-    }
-
-    .filter-btn:hover:not(.active) {
+    .control-select:hover {
         border-color: var(--accent-primary);
         background: var(--btn-bg-hover);
     }
 
-    .stats {
-        display: flex;
-        gap: 2rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--border-primary);
-        color: var(--text-secondary);
-        font-size: 0.875rem;
-        transition: all 0.3s ease;
+    .control-select:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
+    /* Color Controls */
+    .color-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .color-swatch {
+        width: 60px;
+        height: 38px;
+        border: 2px solid var(--border-primary);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        flex-shrink: 0;
+    }
+
+    .color-swatch:hover {
+        border-color: var(--accent-primary);
+        transform: scale(1.05);
+        box-shadow:
+            inset 0 2px 4px rgba(0, 0, 0, 0.1),
+            0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .color-swatch:active {
+        transform: scale(0.98);
+    }
+
+    /* Content */
     .content {
         padding: 1rem;
         height: calc(100vh - 400px);
@@ -676,14 +1096,10 @@
         margin-bottom: 0.5rem;
     }
 
+    /* Responsive Styles */
     @media (max-width: 1024px) {
-        .controls-row {
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .filter-group {
-            min-width: 100%;
+        .control-grid {
+            grid-template-columns: 1fr;
         }
     }
 
@@ -717,26 +1133,52 @@
             font-size: 0.8rem;
         }
 
-        .controls {
+        .features {
+            display: none;
+        }
+
+        .search-box {
+            padding: 1rem 1rem 0 1rem;
+        }
+
+        input[type="search"] {
+            padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+            font-size: 0.9rem;
+        }
+
+        .search-icon {
+            left: 1.75rem;
+            width: 18px;
+            height: 18px;
+        }
+
+        .search-clear {
+            right: 1.5rem;
+            width: 28px;
+            height: 28px;
+            font-size: 1.25rem;
+        }
+
+        .stats-bar {
+            padding: 0.75rem 1rem;
+        }
+
+        .stats {
+            gap: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .section-header {
+            padding: 0.875rem 1rem;
+        }
+
+        .section-content {
             padding: 1rem;
         }
 
         .content {
             padding: 0.5rem;
             height: calc(100vh - 420px);
-        }
-
-        .stats {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .filter-buttons {
-            justify-content: flex-start;
-        }
-
-        .filter-btn {
-            flex: 0 0 auto;
         }
     }
 
@@ -757,32 +1199,67 @@
             gap: 1rem;
         }
 
-        .theme-toggle {
-            padding: 0.5rem;
-        }
-
         h1 {
             font-size: 1.5rem;
         }
 
         .subtitle,
-        .frameworks {
+        .frameworks,
+        .features {
             display: none;
         }
 
-        .controls {
+        .links {
+            gap: 0.5rem;
+        }
+
+        .links a {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .search-box {
+            padding: 0.75rem 0.75rem 0 0.75rem;
+        }
+
+        .stats-bar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
             padding: 0.75rem;
         }
 
-        input[type="search"] {
-            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-            font-size: 0.9rem;
+        .stats {
+            gap: 0.75rem;
         }
 
-        .search-icon {
-            left: 0.75rem;
-            width: 18px;
-            height: 18px;
+        .cdn-hint {
+            display: none;
+        }
+
+        .section-header {
+            padding: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+        }
+
+        .section-content {
+            padding: 0.75rem;
+        }
+
+        .control-grid {
+            gap: 1rem;
+        }
+
+        .button-group {
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            flex: 1;
+            min-width: calc(50% - 0.25rem);
         }
 
         .content {
