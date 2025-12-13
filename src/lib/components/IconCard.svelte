@@ -1,5 +1,6 @@
 <script lang="ts">
     import { selectedFramework } from "$lib/stores/preferences.svelte";
+    import { IconCheck, IconLink } from "@tabler/icons-svelte";
 
     let { icon, iconColor = "#3b82f6", onclick } = $props();
 
@@ -151,37 +152,10 @@
             title={copySuccess ? "Copied!" : `Copy ${cdnCode.label} CDN code`}
         >
             {#if copySuccess}
-                <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
+                <IconCheck size={14} stroke={3} />
                 <span>Copied!</span>
             {:else}
-                <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <path
-                        d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-                    ></path>
-                    <path
-                        d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-                    ></path>
-                </svg>
+                <IconLink size={14} stroke={2} />
                 <span>{cdnCode.label}</span>
             {/if}
         </button>
@@ -288,10 +262,6 @@
         background: #059669;
     }
 
-    .cdn-copy-btn svg {
-        flex-shrink: 0;
-    }
-
     .cdn-copy-btn span {
         white-space: nowrap;
     }
@@ -325,11 +295,6 @@
             font-size: 0.65rem;
             top: 0.4rem;
             right: 0.4rem;
-        }
-
-        .cdn-copy-btn svg {
-            width: 12px;
-            height: 12px;
         }
     }
 

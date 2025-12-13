@@ -1,28 +1,24 @@
 <script lang="ts">
-    import {
-        PACKAGE_MANAGERS,
-        type PackageManager,
-    } from "$lib/stores/preferences.svelte";
-    import {
-        FRAMEWORKS,
-        type FrameworkId,
-    } from "$lib/data/frameworks-helpers";
-    import { getCodeExample, type CodeExample } from "$lib/data/code-examples";
+    import { FRAMEWORKS } from "$lib/data/frameworks-helpers";
+    import { getCodeExample } from "$lib/data/code-examples";
+    import { IconAlertCircle, IconInfoCircle } from "@tabler/icons-svelte";
 
-    let { icon, iconColor = "#3b82f6", framework, packageManager, installMethod, onclose } = $props();
+    let {
+        icon,
+        iconColor = "#3b82f6",
+        framework,
+        packageManager,
+        installMethod,
+        onclose,
+    } = $props();
     let copySuccess = $state(false);
 
-
-
     // Check if current framework has NPM package
-    let currentFramework = $derived(
-        FRAMEWORKS.find((f) => f.id === framework)
-    );
+    let currentFramework = $derived(FRAMEWORKS.find((f) => f.id === framework));
     let hasNpmPackage = $derived(currentFramework?.hasNpmPackage ?? true);
 
-
     let currentExample = $derived.by(() => {
-        if (!currentFramework) return { install: '', import: '', usage: '' };
+        if (!currentFramework) return { install: "", import: "", usage: "" };
         return getCodeExample(
             framework,
             icon,
@@ -87,44 +83,18 @@
 
         {#if !hasNpmPackage}
             <div class="no-package-warning">
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
+                <IconAlertCircle size={20} stroke={2} />
                 <div>
-                    <strong>Note:</strong> {currentFramework?.package} is not
-                    available on NPM. CDN is the only installation method for this
-                    framework.
+                    <strong>Note:</strong>
+                    {currentFramework?.package} is not available on NPM. CDN is the
+                    only installation method for this framework.
                 </div>
             </div>
         {/if}
 
         {#if installMethod === "cdn"}
             <div class="cdn-info">
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
+                <IconInfoCircle size={20} stroke={2} />
                 <div>
                     <strong>Zero Installation!</strong> Icons served directly from
                     NPM via jsDelivr CDN. No build step required. Global CDN with
@@ -135,9 +105,7 @@
 
         <div class="code-section">
             <h3>
-                {installMethod === "cdn"
-                    ? "CDN Setup"
-                    : "Installation"}
+                {installMethod === "cdn" ? "CDN Setup" : "Installation"}
             </h3>
             <pre class="code-block"><code>{currentExample.install}</code></pre>
             <button
@@ -180,12 +148,12 @@
                         ✅ <strong>Zero bundle size</strong> - Icons loaded on-demand
                     </li>
                     <li>
-                        ✅ <strong>Global CDN</strong> - Fast delivery worldwide via
-                        jsDelivr
+                        ✅ <strong>Global CDN</strong> - Fast delivery worldwide
+                        via jsDelivr
                     </li>
                     <li>
-                        ✅ <strong>No build step</strong> - Works immediately in any
-                        project
+                        ✅ <strong>No build step</strong> - Works immediately in
+                        any project
                     </li>
                     <li>
                         ✅ <strong>Version control</strong> - Pin to specific version
@@ -329,11 +297,6 @@
         color: var(--text-primary, #374151);
     }
 
-    .no-package-warning svg {
-        flex-shrink: 0;
-        color: #f59e0b;
-    }
-
     .no-package-warning strong {
         color: #f59e0b;
     }
@@ -352,11 +315,6 @@
         border-radius: 8px;
         margin-bottom: 1.5rem;
         color: var(--text-primary, #374151);
-    }
-
-    .cdn-info svg {
-        flex-shrink: 0;
-        color: var(--accent-primary, #3b82f6);
     }
 
     .cdn-info strong {

@@ -1,5 +1,14 @@
 <script lang="ts">
     import * as TablerIcons from "@tabler/icons-svelte";
+    import {
+        IconMoon,
+        IconSun,
+        IconSearch,
+        IconLayoutGrid,
+        IconChevronDown,
+        IconCode,
+        IconBrandGithub,
+    } from "@tabler/icons-svelte";
     import IconCard from "$lib/components/IconCard.svelte";
     import IconModal from "$lib/components/IconModal.svelte";
     import ColorPickerModal from "$lib/components/ColorPickerModal.svelte";
@@ -13,9 +22,7 @@
         selectedPackageManager,
         PACKAGE_MANAGERS,
         selectedFramework,
-        type PackageManager,
         FRAMEWORKS,
-        type FrameworkId,
     } from "$lib/stores/preferences.svelte";
     import { windowState } from "$lib/stores/layout.svelte";
 
@@ -146,6 +153,13 @@
             selectedGridSize.value = "large";
         }
     });
+
+    // Auto-switch from small to large on tablet (since small is not available)
+    $effect(() => {
+        if (windowState.isTablet && selectedGridSize.value === "small") {
+            selectedGridSize.value = "large";
+        }
+    });
 </script>
 
 <svelte:head>
@@ -186,6 +200,15 @@
                     </div>
                     <div class="links">
                         <a
+                            href="https://github.com/chizaruu/tabler-icons-search"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="github-star-link"
+                        >
+                            <IconBrandGithub size={18} stroke={2} />
+                            Star on GitHub
+                        </a>
+                        <a
                             href="https://github.com/tabler/tabler-icons"
                             target="_blank"
                             rel="noopener noreferrer"
@@ -214,45 +237,9 @@
                     aria-label="Toggle theme"
                 >
                     {#if selectedTheme.value === "light"}
-                        <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <path
-                                d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                            ></path>
-                        </svg>
+                        <IconMoon size={24} stroke={2} />
                     {:else}
-                        <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <circle cx="12" cy="12" r="5"></circle>
-                            <line x1="12" y1="1" x2="12" y2="3"></line>
-                            <line x1="12" y1="21" x2="12" y2="23"></line>
-                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"
-                            ></line>
-                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"
-                            ></line>
-                            <line x1="1" y1="12" x2="3" y2="12"></line>
-                            <line x1="21" y1="12" x2="23" y2="12"></line>
-                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"
-                            ></line>
-                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"
-                            ></line>
-                        </svg>
+                        <IconSun size={24} stroke={2} />
                     {/if}
                 </button>
             </div>
@@ -261,18 +248,9 @@
         <div class="controls">
             <!-- Search Bar - Always Visible -->
             <div class="search-box">
-                <svg
-                    class="search-icon"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
+                <span class="search-icon">
+                    <IconSearch size={20} stroke={2} />
+                </span>
                 <input
                     type="search"
                     bind:value={searchQuery}
@@ -310,33 +288,11 @@
                     onclick={() => toggleSection("display")}
                 >
                     <span class="section-title">
-                        <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                        </svg>
+                        <IconLayoutGrid size={18} stroke={2} />
                         Style & Display
                     </span>
                     {#if windowState.isMobile}
-                        <svg
-                            class="chevron"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M6 9l6 6 6-6"></path>
-                        </svg>
+                        <IconChevronDown class="chevron" size={20} stroke={2} />
                     {/if}
                 </button>
 
@@ -377,7 +333,7 @@
                                 </div>
                             </div>
 
-                            <!-- Grid Size (Desktop/Tablet only) -->
+                            <!-- Grid Size (Desktop and Tablet) -->
                             {#if windowState.isDesktop || windowState.isTablet}
                                 <div class="control-item">
                                     <label for="gridSize" class="control-label"
@@ -385,16 +341,19 @@
                                     >
                                     <div class="button-group">
                                         {#each GRID_SIZES as size}
-                                            <button
-                                                class="control-btn"
-                                                class:active={selectedGridSize.value ===
-                                                    size.id}
-                                                onclick={() =>
-                                                    (selectedGridSize.value =
-                                                        size.id)}
-                                            >
-                                                {size.name}
-                                            </button>
+                                            <!-- Show all sizes on desktop, only medium and large on tablet -->
+                                            {#if windowState.isDesktop || (windowState.isTablet && (size.id === "medium" || size.id === "large"))}
+                                                <button
+                                                    class="control-btn"
+                                                    class:active={selectedGridSize.value ===
+                                                        size.id}
+                                                    onclick={() =>
+                                                        (selectedGridSize.value =
+                                                            size.id)}
+                                                >
+                                                    {size.name}
+                                                </button>
+                                            {/if}
                                         {/each}
                                     </div>
                                 </div>
@@ -441,31 +400,11 @@
                     onclick={() => toggleSection("code")}
                 >
                     <span class="section-title">
-                        <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <polyline points="16 18 22 12 16 6"></polyline>
-                            <polyline points="8 6 2 12 8 18"></polyline>
-                        </svg>
+                        <IconCode size={18} stroke={2} />
                         Code Settings
                     </span>
                     {#if windowState.isMobile}
-                        <svg
-                            class="chevron"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M6 9l6 6 6-6"></path>
-                        </svg>
+                        <IconChevronDown class="chevron" size={20} stroke={2} />
                     {/if}
                 </button>
 
@@ -559,15 +498,7 @@
         <div class="content">
             {#if filteredIcons.length === 0}
                 <div class="empty-state">
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
+                    <IconSearch size={80} stroke={2} />
                     <h2>No icons found</h2>
                     <p>Try a different search term or filter</p>
                 </div>
@@ -732,10 +663,6 @@
         transform: scale(1.05);
     }
 
-    .theme-toggle svg {
-        display: block;
-    }
-
     h1 {
         font-size: 2.5rem;
         margin-bottom: 0.5rem;
@@ -797,6 +724,30 @@
     .links a:hover {
         background: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
+    }
+
+    .github-star-link {
+        background: linear-gradient(
+            135deg,
+            #24292e 0%,
+            #1a1e22 100%
+        ) !important;
+        border: 2px solid rgba(255, 255, 255, 0.4) !important;
+        font-weight: 600 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .github-star-link:hover {
+        background: linear-gradient(
+            135deg,
+            #2d333b 0%,
+            #22272e 100%
+        ) !important;
+        transform: translateY(-2px) scale(1.05) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
     }
 
     /* Controls Section */
@@ -924,19 +875,6 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--text-secondary);
-    }
-
-    .section-title svg {
-        color: var(--accent-primary);
-    }
-
-    .chevron {
-        transition: transform 0.3s ease;
-        color: var(--text-tertiary);
-    }
-
-    .section-header.expanded .chevron {
-        transform: rotate(180deg);
     }
 
     .section-content {
@@ -1070,6 +1008,14 @@
         transform: scale(0.98);
     }
 
+    /* Limit Choose Color button width on tablet */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .color-controls .control-btn.flex-1 {
+            flex: 0 1 auto;
+            max-width: 200px;
+        }
+    }
+
     /* Content */
     .content {
         padding: 1rem;
@@ -1083,13 +1029,6 @@
         padding: 4rem 2rem;
         color: var(--text-secondary);
         transition: color 0.3s ease;
-    }
-
-    .empty-state svg {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 1rem;
-        opacity: 0.5;
     }
 
     .empty-state h2 {
