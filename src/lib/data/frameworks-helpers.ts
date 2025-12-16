@@ -32,7 +32,7 @@ export function getCdnUrl(
     const { componentName, name: iconName, style } = icon;
 
     const cdnUrls: Record<FrameworkId, string> = {
-        "svelte-runes": `https://cdn.jsdelivr.net/npm/@tabler/icons-svelte@${CDN_VERSION}/dist/icons/${componentName}.svelte`,
+        "svelte-runes": `https://cdn.jsdelivr.net/npm/@tabler/icons-svelte-runes@${CDN_VERSION}/dist/icons/${componentName}.svelte`,
         svelte: `https://cdn.jsdelivr.net/npm/@tabler/icons-svelte@${CDN_VERSION}/dist/icons/${componentName}.svelte`,
         react: `https://cdn.jsdelivr.net/npm/@tabler/icons-react@${CDN_VERSION}/dist/esm/icons/${componentName}.mjs`,
         "react-native": `https://cdn.jsdelivr.net/npm/@tabler/icons-react-native@${CDN_VERSION}/esm/icons/${componentName}.js`,

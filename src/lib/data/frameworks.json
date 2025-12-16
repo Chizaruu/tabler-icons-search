@@ -4,8 +4,8 @@
         {
             "id": "svelte-runes",
             "name": "Svelte 5 (Runes)",
-            "package": "@tabler/icons-svelte",
-            "cdnPackage": "@tabler/icons-svelte",
+            "package": "@tabler/icons-svelte-runes",
+            "cdnPackage": "@tabler/icons-svelte-runes",
             "hasCdnPackage": true,
             "hasNpmPackage": true,
             "category": "component-library"
